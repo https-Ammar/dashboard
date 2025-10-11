@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>قائمة الأطباء والاستشاريين</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/css/main.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+        }
+        .doctor-card {
+            display: flex;
+            flex-direction: column;
+            border-radius: 1rem;
+            border: 1px solid #e5e7eb;
+            background-color: white;
+            padding: 1.5rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            height: 100%; /* Ensure all cards in the grid have the same height */
+        }
+        .dark .doctor-card {
+            border-color: rgb(55 65 81);
+            background-color: rgb(255 255 255 / 0.03);
+        }
+        .doctor-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 10px -3px rgba(0, 0, 0, 0.1);
+        }
+        .doctor-image {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 50%;
+            margin-bottom: 1rem;
+            border: 3px solid #3b82f6; /* Blue ring around image */
+        }
+        .btn-view-profile {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.5rem 1rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            color: white;
+            background-color: #3b82f6; /* Blue-500 */
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.15s ease-in-out;
+            margin-top: auto; /* Push button to the bottom */
+        }
+        .btn-view-profile:hover {
+            background-color: #2563eb; /* Blue-600 */
+        }
+        .stats-box {
+            display: flex;
+            align-items: center;
+            padding: 0.5rem;
+            background-color: #f3f4f6;
+            border-radius: 0.5rem;
+            margin-top: 1rem;
+        }
+        .dark .stats-box {
+            background-color: rgb(255 255 255 / 0.05);
+        }
+    </style>
+</head>
+<body x-data="{ page: 'doctors-list', loaded: true, darkMode: false, stickyMenu: false, sidebarToggle: false, scrollTop: false, isTaskModalModal: false }" x-init="darkMode = JSON.parse(localStorage.getItem('darkMode')); $watch('darkMode', value => localStorage.setItem('darkMode', JSON.stringify(value)))" :class="{'dark bg-gray-900': darkMode === true}">
+    <div x-show="loaded" x-transition.opacity x-init="window.addEventListener('DOMContentLoaded', () => {setTimeout(() => loaded = false, 500)})" class="fixed inset-0 z-999999 flex items-center justify-center bg-white dark:bg-black">
+        <div class="h-16 w-16 animate-spin rounded-full border-4 border-solid border-brand-500 border-t-transparent"></div>
+    </div>
+    <div class="flex h-screen overflow-hidden">
+        
+        <div class="relative flex flex-1 flex-col overflow-x-hidden overflow-y-auto">
+            <div :class="sidebarToggle ? 'block xl:hidden' : 'hidden'" class="fixed z-50 h-screen w-full bg-gray-900/50"></div>
+            <main>
+                <header x-data="{menuToggle: false}"
+                    class="sticky top-0 z-99999 flex w-full border-gray-200 bg-white xl:border-b dark:border-gray-800 dark:bg-gray-900">
+                    <div class="flex grow flex-col items-center justify-between xl:flex-row xl:px-6">
+                        <div
+                            class="flex w-full items-center justify-between gap-2 border-b border-gray-200 px-3 py-3 sm:gap-4 lg:py-4 xl:justify-normal xl:border-b-0 xl:px-0 dark:border-gray-800">
+                            <button
+                                :class="sidebarToggle ? 'xl:bg-transparent dark:xl:bg-transparent bg-gray-100 dark:bg-gray-800' : ''"
+                                class="z-99999 flex h-10 w-10 items-center justify-center rounded-lg border-gray-200 text-gray-500 xl:h-11 xl:w-11 xl:border dark:border-gray-800 dark:text-gray-400"
+                                @click.stop="sidebarToggle = !sidebarToggle">
+                                <i class="bi bi-list xl:block hidden" style="font-size:16px;"></i>
+                                <i :class="sidebarToggle ? 'hidden' : 'block xl:hidden'" class="bi bi-list" style="font-size:24px;"></i>
+                                <i :class="sidebarToggle ? 'block xl:hidden' : 'hidden'" class="bi bi-x" style="font-size:24px;"></i>
+                            </button>
+                            <h1 class="text-xl font-bold text-gray-800 dark:text-white/90">فريق الأطباء والاستشاريين</h1>
+                            <button
+                                class="z-99999 flex h-10 w-10 items-center justify-center rounded-lg text-gray-700 hover:bg-gray-100 xl:hidden dark:text-gray-400 dark:hover:bg-gray-800"
+                                :class="menuToggle ? 'bg-gray-100 dark:bg-gray-800' : ''" @click.stop="menuToggle = !menuToggle">
+                                <i class="bi bi-three-dots-vertical" style="font-size:24px;"></i>
+                            </button>
+                        </div>
+                        <div :class="menuToggle ? 'flex' : 'hidden'"
+                            class="shadow-theme-md w-full items-center justify-between gap-4 px-5 py-4 xl:flex xl:justify-end xl:px-0 xl:shadow-none">
+                            <div class="2xsm:gap-3 flex items-center gap-2">
+                                <button
+                                    class="hover:text-dark-900 relative flex h-11 w-11 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white"
+                                    @click.prevent="darkMode = !darkMode">
+                                    <i class="bi bi-moon-fill dark:block hidden" style="font-size:20px;"></i>
+                                    <i class="bi bi-sun-fill dark:hidden" style="font-size:20px;"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </header>
+                <div class="mx-auto max-w-(--breakpoint-2xl) p-4 md:p-6">
+                    <div class="col-span-12">
+                        <div class="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
+                            <div class="px-4 py-4 sm:pl-6 sm:pr-4">
+                                <h3 class="text-lg font-semibold text-gray-800 dark:text-white/90">قابل خبراء التغذية لدينا</h3>
+                            </div>
+                            <div class="border-t border-gray-100 p-4 dark:border-gray-800 sm:p-6">
+                                
+                                <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                                    
+                                    <div class="doctor-card">
+                                        <img src="https://via.placeholder.com/150/3b82f6/FFFFFF?text=Dr.A" alt="صورة الدكتور أحمد" class="doctor-image">
+                                        
+                                        <h4 class="text-xl font-bold text-gray-800 dark:text-white/90 mb-1">د. أحمد علي</h4>
+                                        <p class="text-blue-500 font-semibold mb-3">
+                                            <i class="bi bi-heart-pulse-fill ml-1"></i>
+                                            أخصائي إنقاص الوزن
+                                        </p>
+                                        
+                                        <p class="text-gray-600 dark:text-gray-400 mb-4 text-sm flex-grow">
+                                            خبير تغذية معتمد بخبرة 10 سنوات في برامج خسارة الدهون والتحول الجسدي الشامل.
+                                        </p>
+                                        
+                                        <div class="stats-box mb-4">
+                                            <i class="bi bi-people-fill text-success-500 ml-2"></i>
+                                            <span class="text-gray-700 dark:text-gray-300 font-medium">عدد المشتركين: **145**</span>
+                                        </div>
+
+                                        <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">
+                                            <i class="bi bi-calendar-check-fill ml-1"></i>
+                                            متاح: **الأحد، الثلاثاء، الخميس** (9:00 ص - 5:00 م)
+                                        </p>
+
+                                        <a href="#" class="btn-view-profile">
+                                            حجز استشارة
+                                            <i class="bi bi-arrow-left mr-2"></i>
+                                        </a>
+                                    </div>
+                                    
+                                    <div class="doctor-card">
+                                        <img src="https://via.placeholder.com/150/10b981/FFFFFF?text=Dr.F" alt="صورة الدكتورة فاطمة" class="doctor-image">
+                                        
+                                        <h4 class="text-xl font-bold text-gray-800 dark:text-white/90 mb-1">د. فاطمة الزهراء</h4>
+                                        <p class="text-blue-500 font-semibold mb-3">
+                                            <i class="bi bi-speedometer2 ml-1"></i>
+                                            استشارية التغذية الرياضية
+                                        </p>
+                                        
+                                        <p class="text-gray-600 dark:text-gray-400 mb-4 text-sm flex-grow">
+                                            متخصصة في خطط بناء العضلات والأداء الرياضي وتغذية التحمل للرياضيين المحترفين والهواة.
+                                        </p>
+                                        
+                                        <div class="stats-box mb-4">
+                                            <i class="bi bi-people-fill text-success-500 ml-2"></i>
+                                            <span class="text-gray-700 dark:text-gray-300 font-medium">عدد المشتركين: **88**</span>
+                                        </div>
+
+                                        <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">
+                                            <i class="bi bi-calendar-check-fill ml-1"></i>
+                                            متاح: **السبت، الإثنين، الأربعاء** (1:00 م - 9:00 م)
+                                        </p>
+
+                                        <a href="#" class="btn-view-profile">
+                                            حجز استشارة
+                                            <i class="bi bi-arrow-left mr-2"></i>
+                                        </a>
+                                    </div>
+
+                                    <div class="doctor-card">
+                                        <img src="https://via.placeholder.com/150/ef4444/FFFFFF?text=Dr.M" alt="صورة الدكتور محمود" class="doctor-image">
+                                        
+                                        <h4 class="text-xl font-bold text-gray-800 dark:text-white/90 mb-1">د. محمود هاشم</h4>
+                                        <p class="text-blue-500 font-semibold mb-3">
+                                            <i class="bi bi-activity ml-1"></i>
+                                            أخصائي التغذية العلاجية
+                                        </p>
+                                        
+                                        <p class="text-gray-600 dark:text-gray-400 mb-4 text-sm flex-grow">
+                                            متخصص في التعامل مع حالات الأمراض المزمنة مثل السكري وضغط الدم واضطرابات الجهاز الهضمي عبر الغذاء.
+                                        </p>
+                                        
+                                        <div class="stats-box mb-4">
+                                            <i class="bi bi-people-fill text-success-500 ml-2"></i>
+                                            <span class="text-gray-700 dark:text-gray-300 font-medium">عدد المشتركين: **62**</span>
+                                        </div>
+
+                                        <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">
+                                            <i class="bi bi-calendar-check-fill ml-1"></i>
+                                            متاح: **كل الأيام** (9:00 ص - 12:00 م)
+                                        </p>
+
+                                        <a href="#" class="btn-view-profile">
+                                            حجز استشارة
+                                            <i class="bi bi-arrow-left mr-2"></i>
+                                        </a>
+                                    </div>
+                                    
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-span-12 mt-6">
+                        <div class="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03] p-6">
+                            <h3 class="text-lg font-semibold text-gray-800 dark:text-white/90 mb-4">كيفية اختيار طبيبك؟</h3>
+                            <p class="text-gray-600 dark:text-gray-400">
+                                ننصح باختيار الطبيب بناءً على **التخصص** الذي يناسب هدفك (إنقاص وزن، بناء عضلات، أو تغذية علاجية). يمكنك أيضاً الاطلاع على **عدد المشتركين** كدليل على الشعبية والخبرة.
+                            </p>
+                        </div>
+                    </div>
+                    
+                </div>
+            </main>
+        </div>
+    </div>
+    <script defer src="../assets/js/bundle.js"></script>
+</body>
+</html>

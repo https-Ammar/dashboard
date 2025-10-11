@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إنشاء باقة اشتراك جديدة</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/css/main.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+        }
+        /* Custom styles for form elements to fit the design */
+        .form-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border-radius: 0.75rem; /* rounded-xl */
+            border: 1px solid rgb(229 231 235); /* border-gray-200 */
+            background-color: white;
+            color: #1f2937; /* text-gray-900 */
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        }
+        .dark .form-input {
+            border-color: rgb(55 65 81); /* dark:border-gray-800 */
+            background-color: rgb(255 255 255 / 0.03); /* dark:bg-white/[0.03] */
+            color: rgb(255 255 255 / 0.9); /* dark:text-white/90 */
+        }
+        .form-input:focus {
+            border-color: #3b82f6; /* blue-500 */
+            box-shadow: 0 0 0 3px rgb(59 130 246 / 0.25);
+            outline: none;
+        }
+        .btn-submit {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem; /* rounded-xl */
+            font-weight: 600;
+            color: white;
+            background-color: #10b981; /* success-500 */
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.15s ease-in-out;
+        }
+        .btn-submit:hover {
+            background-color: #059669; /* success-600 */
+        }
+    </style>
+</head>
+<body x-data="{ page: 'create-package', loaded: true, darkMode: false, stickyMenu: false, sidebarToggle: false, scrollTop: false, isTaskModalModal: false, hasDiscount: false }" x-init="darkMode = JSON.parse(localStorage.getItem('darkMode')); $watch('darkMode', value => localStorage.setItem('darkMode', JSON.stringify(value)))" :class="{'dark bg-gray-900': darkMode === true}">
+    <div x-show="loaded" x-transition.opacity x-init="window.addEventListener('DOMContentLoaded', () => {setTimeout(() => loaded = false, 500)})" class="fixed inset-0 z-999999 flex items-center justify-center bg-white dark:bg-black">
+        <div class="h-16 w-16 animate-spin rounded-full border-4 border-solid border-brand-500 border-t-transparent"></div>
+    </div>
+    <div class="flex h-screen overflow-hidden">
+        
+        <div class="relative flex flex-1 flex-col overflow-x-hidden overflow-y-auto">
+            <div :class="sidebarToggle ? 'block xl:hidden' : 'hidden'" class="fixed z-50 h-screen w-full bg-gray-900/50"></div>
+            <main>
+                <header x-data="{menuToggle: false}"
+                    class="sticky top-0 z-99999 flex w-full border-gray-200 bg-white xl:border-b dark:border-gray-800 dark:bg-gray-900">
+                    <div class="flex grow flex-col items-center justify-between xl:flex-row xl:px-6">
+                        <div
+                            class="flex w-full items-center justify-between gap-2 border-b border-gray-200 px-3 py-3 sm:gap-4 lg:py-4 xl:justify-normal xl:border-b-0 xl:px-0 dark:border-gray-800">
+                            <button
+                                :class="sidebarToggle ? 'xl:bg-transparent dark:xl:bg-transparent bg-gray-100 dark:bg-gray-800' : ''"
+                                class="z-99999 flex h-10 w-10 items-center justify-center rounded-lg border-gray-200 text-gray-500 xl:h-11 xl:w-11 xl:border dark:border-gray-800 dark:text-gray-400"
+                                @click.stop="sidebarToggle = !sidebarToggle">
+                                <i class="bi bi-list xl:block hidden" style="font-size:16px;"></i>
+                                <i :class="sidebarToggle ? 'hidden' : 'block xl:hidden'" class="bi bi-list" style="font-size:24px;"></i>
+                                <i :class="sidebarToggle ? 'block xl:hidden' : 'hidden'" class="bi bi-x" style="font-size:24px;"></i>
+                            </button>
+                            <h1 class="text-xl font-bold text-gray-800 dark:text-white/90">إدارة الاشتراكات</h1>
+                            <button
+                                class="z-99999 flex h-10 w-10 items-center justify-center rounded-lg text-gray-700 hover:bg-gray-100 xl:hidden dark:text-gray-400 dark:hover:bg-gray-800"
+                                :class="menuToggle ? 'bg-gray-100 dark:bg-gray-800' : ''" @click.stop="menuToggle = !menuToggle">
+                                <i class="bi bi-three-dots-vertical" style="font-size:24px;"></i>
+                            </button>
+                        </div>
+                        <div :class="menuToggle ? 'flex' : 'hidden'"
+                            class="shadow-theme-md w-full items-center justify-between gap-4 px-5 py-4 xl:flex xl:justify-end xl:px-0 xl:shadow-none">
+                            <div class="2xsm:gap-3 flex items-center gap-2">
+                                <button
+                                    class="hover:text-dark-900 relative flex h-11 w-11 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white"
+                                    @click.prevent="darkMode = !darkMode">
+                                    <i class="bi bi-moon-fill dark:block hidden" style="font-size:20px;"></i>
+                                    <i class="bi bi-sun-fill dark:hidden" style="font-size:20px;"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </header>
+                <div class="mx-auto max-w-(--breakpoint-2xl) p-4 md:p-6">
+                    <div class="col-span-12">
+                        <div class="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
+                            <div class="px-4 py-4 sm:pl-6 sm:pr-4">
+                                <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                                    <h3 class="text-lg font-semibold text-gray-800 dark:text-white/90">إنشاء باقة اشتراك جديدة</h3>
+                                </div>
+                            </div>
+                            <div class="border-t border-gray-100 p-4 dark:border-gray-800 sm:p-6">
+                                
+                                <form id="create-package-form" action="#" method="POST">
+                                    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                                        
+                                        <div class="col-span-1">
+                                            <label for="package_name" class="mb-2.5 block text-sm font-medium text-gray-800 dark:text-white/90">اسم الباقة</label>
+                                            <input type="text" id="package_name" name="package_name" placeholder="مثال: الباقة المميزة" required class="form-input">
+                                        </div>
+
+                                        <div class="col-span-1">
+                                            <label for="original_price" class="mb-2.5 block text-sm font-medium text-gray-800 dark:text-white/90">السعر الأصلي (ج.م)</label>
+                                            <input type="number" id="original_price" name="original_price" placeholder="مثال: 4500" required class="form-input" min="1">
+                                        </div>
+
+                                        <div class="col-span-1">
+                                            <label for="duration_days" class="mb-2.5 block text-sm font-medium text-gray-800 dark:text-white/90">مدة الاشتراك (بالأيام)</label>
+                                            <input type="number" id="duration_days" name="duration_days" placeholder="مثال: 90 يوم" required class="form-input" min="7">
+                                        </div>
+
+                                        <div class="col-span-1">
+                                            <label for="package_icon" class="mb-2.5 block text-sm font-medium text-gray-800 dark:text-white/90">أيقونة الباقة (كلاس BI)</label>
+                                            <input type="text" id="package_icon" name="package_icon" placeholder="مثال: bi-star-fill" class="form-input">
+                                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">مثال: `bi-star-fill` أو `bi-lightning-charge`</p>
+                                        </div>
+
+                                        <div class="col-span-1">
+                                            <label for="image_url" class="mb-2.5 block text-sm font-medium text-gray-800 dark:text-white/90">رابط صورة/رمز توضيحي (اختياري)</label>
+                                            <input type="url" id="image_url" name="image_url" placeholder="مثال: https://example.com/image.jpg" class="form-input">
+                                        </div>
+
+                                        <div class="col-span-1 flex items-center pt-8">
+                                            <input type="checkbox" id="has_discount" name="has_discount" class="w-5 h-5 text-success-500 border-gray-300 rounded focus:ring-success-500 dark:focus:ring-success-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 ml-3" x-model="hasDiscount">
+                                            <label for="has_discount" class="text-sm font-medium text-gray-800 dark:text-white/90">هل يوجد عرض أو خصم حالياً؟</label>
+                                        </div>
+
+                                        <div class="col-span-1" x-show="hasDiscount" x-transition>
+                                            <label for="discount_percent" class="mb-2.5 block text-sm font-medium text-gray-800 dark:text-white/90">قيمة الخصم (نسبة مئوية %)</label>
+                                            <input type="number" id="discount_percent" name="discount_percent" placeholder="مثال: 20" :required="hasDiscount" class="form-input" min="1" max="100">
+                                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">سيتم حساب السعر بعد الخصم تلقائياً.</p>
+                                        </div>
+
+                                        <div class="col-span-1" x-show="hasDiscount" x-transition>
+                                            <label for="discount_expiry_date" class="mb-2.5 block text-sm font-medium text-gray-800 dark:text-white/90">تاريخ انتهاء العرض (اختياري)</label>
+                                            <input type="date" id="discount_expiry_date" name="discount_expiry_date" class="form-input">
+                                        </div>
+
+                                        <div class="col-span-full">
+                                            <label for="description" class="mb-2.5 block text-sm font-medium text-gray-800 dark:text-white/90">النص التعريفي/الوصف المختصر للباقة</label>
+                                            <textarea id="description" name="description" rows="4" placeholder="قدم وصفاً مختصراً ومميزات الباقة (مثل: خطة شهرية شاملة متابعة أسبوعية)" required class="form-input"></textarea>
+                                        </div>
+
+                                        <div class="col-span-full pt-4 flex justify-end">
+                                            <button type="submit" class="btn-submit">
+                                                <i class="bi bi-box-seam-fill mr-2" style="font-size: 1.1rem;"></i>
+                                                إنشاء وحفظ الباقة
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    <script defer src="../assets/js/bundle.js"></script>
+</body>
+</html>

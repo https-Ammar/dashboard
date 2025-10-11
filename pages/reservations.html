@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة حجوزات خدمة التغذية</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/css/main.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+        }
+        .btn-action {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            height: 2.5rem;
+            width: 2.5rem;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            transition: background-color 0.15s ease-in-out;
+        }
+        .btn-accept {
+            color: #10b981;
+            background-color: #10b98114;
+        }
+        .btn-accept:hover {
+            background-color: #10b98133;
+        }
+        .btn-reject {
+            color: #ef4444;
+            background-color: #ef444414;
+            margin-right: 0.5rem;
+        }
+        .btn-reject:hover {
+            background-color: #ef444433;
+        }
+    </style>
+</head>
+<body x-data="{ page: 'saas', loaded: true, darkMode: false, stickyMenu: false, sidebarToggle: false, scrollTop: false, isTaskModalModal: false }" x-init="darkMode = JSON.parse(localStorage.getItem('darkMode')); $watch('darkMode', value => localStorage.setItem('darkMode', JSON.stringify(value)))" :class="{'dark bg-gray-900': darkMode === true}">
+    <div x-show="loaded" x-transition.opacity x-init="window.addEventListener('DOMContentLoaded', () => {setTimeout(() => loaded = false, 500)})" class="fixed inset-0 z-999999 flex items-center justify-center bg-white dark:bg-black">
+        <div class="h-16 w-16 animate-spin rounded-full border-4 border-solid border-brand-500 border-t-transparent"></div>
+    </div>
+    <div class="flex h-screen overflow-hidden">
+               <div class="relative flex flex-1 flex-col overflow-x-hidden overflow-y-auto">
+            <div :class="sidebarToggle ? 'block xl:hidden' : 'hidden'" class="fixed z-50 h-screen w-full bg-gray-900/50"></div>
+            <main>
+                <header x-data="{menuToggle: false}"
+    class="sticky top-0 z-99999 flex w-full border-gray-200 bg-white xl:border-b dark:border-gray-800 dark:bg-gray-900">
+    <div class="flex grow flex-col items-center justify-between xl:flex-row xl:px-6">
+        <div
+            class="flex w-full items-center justify-between gap-2 border-b border-gray-200 px-3 py-3 sm:gap-4 lg:py-4 xl:justify-normal xl:border-b-0 xl:px-0 dark:border-gray-800">
+            <button
+                :class="sidebarToggle ? 'xl:bg-transparent dark:xl:bg-transparent bg-gray-100 dark:bg-gray-800' : ''"
+                class="z-99999 flex h-10 w-10 items-center justify-center rounded-lg border-gray-200 text-gray-500 xl:h-11 xl:w-11 xl:border dark:border-gray-800 dark:text-gray-400"
+                @click.stop="sidebarToggle = !sidebarToggle">
+                <i class="bi bi-list xl:block hidden" style="font-size:16px;"></i>
+                <i :class="sidebarToggle ? 'hidden' : 'block xl:hidden'" class="bi bi-list" style="font-size:24px;"></i>
+                <i :class="sidebarToggle ? 'block xl:hidden' : 'hidden'" class="bi bi-x" style="font-size:24px;"></i>
+            </button>
+
+            <button
+                class="z-99999 flex h-10 w-10 items-center justify-center rounded-lg text-gray-700 hover:bg-gray-100 xl:hidden dark:text-gray-400 dark:hover:bg-gray-800"
+                :class="menuToggle ? 'bg-gray-100 dark:bg-gray-800' : ''" @click.stop="menuToggle = !menuToggle">
+                <i class="bi bi-three-dots-vertical" style="font-size:24px;"></i>
+            </button>
+        </div>
+
+        <div :class="menuToggle ? 'flex' : 'hidden'"
+            class="shadow-theme-md w-full items-center justify-between gap-4 px-5 py-4 xl:flex xl:justify-end xl:px-0 xl:shadow-none">
+            <div class="2xsm:gap-3 flex items-center gap-2">
+                <button
+                    class="hover:text-dark-900 relative flex h-11 w-11 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white">
+                    <a href="./auth/logout.php" class="flex items-center gap-3">
+                        <i class="bi bi-box-arrow-right fill-gray-500 group-hover:fill-gray-700 dark:group-hover:fill-gray-300"
+                            style="font-size:24px;"></i>
+                    </a>
+                </button>
+
+                <button
+                    class="hover:text-dark-900 relative flex h-11 w-11 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white"
+                    @click.prevent="darkMode = !darkMode">
+                    <i class="bi bi-moon-fill dark:block hidden" style="font-size:20px;"></i>
+                    <i class="bi bi-sun-fill dark:hidden" style="font-size:20px;"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</header>
+                <div class="mx-auto max-w-(--breakpoint-2xl) p-4 md:p-6">
+                    <div class="col-span-12">
+                        <div class="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
+                            <div class="px-4 py-4 sm:pl-6 sm:pr-4">
+                                <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                                    <h3 class="text-lg font-semibold text-gray-800 dark:text-white/90">لوحة تحكم حجوزات التغذية</h3>
+                                    <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="border-t border-gray-100 p-4 dark:border-gray-800 sm:p-6">
+                                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 xl:grid-cols-3">
+                                    <div class="flex items-center justify-between rounded-2xl border border-gray-100 bg-white py-4 pl-4 pr-4 dark:border-gray-800 dark:bg-white/[0.03] xl:pr-5">
+                                        <div class="flex items-center gap-4">
+                                            <div class="flex h-[52px] w-[52px] items-center justify-center rounded-xl bg-success-500/[0.08] text-success-500">
+                                                <i class="bi bi-person-lines-fill" style="font-size:24px;"></i>
+                                            </div>
+                                            <div>
+                                                <h4 class="mb-1 text-sm font-medium text-gray-800 dark:text-white/90">إجمالي الحجوزات</h4>
+                                                <span class="block text-sm text-gray-500 dark:text-gray-400">150 </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center justify-between rounded-2xl border border-gray-100 bg-white py-4 pl-4 pr-4 dark:border-gray-800 dark:bg-white/[0.03] xl:pr-5">
+                                        <div class="flex items-center gap-4">
+                                            <div class="flex h-[52px] w-[52px] items-center justify-center rounded-xl bg-warning-500/[0.08] text-warning-500">
+                                                <i class="bi bi-hourglass-split" style="font-size:24px;"></i>
+                                            </div>
+                                            <div>
+                                                <h4 class="mb-1 text-sm font-medium text-gray-800 dark:text-white/90">حجوزات قيد الانتظار</h4>
+                                                <span class="block text-sm text-gray-500 dark:text-gray-400">12</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center justify-between rounded-2xl border border-gray-100 bg-white py-4 pl-4 pr-4 dark:border-gray-800 dark:bg-white/[0.03] xl:pr-5">
+                                        <div class="flex items-center gap-4">
+                                            <div class="flex h-[52px] w-[52px] items-center justify-center rounded-xl bg-orange-500/[0.08] text-orange-500">
+                                                <i class="bi bi-check-circle-fill" style="font-size:24px;"></i>
+                                            </div>
+                                            <div>
+                                                <h4 class="mb-1 text-sm font-medium text-gray-800 dark:text-white/90">حجوزات مقبولة</h4>
+                                                <span class="block text-sm text-gray-500 dark:text-gray-400">138</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center justify-between rounded-2xl border border-gray-100 bg-white py-4 pl-4 pr-4 dark:border-gray-800 dark:bg-white/[0.03] xl:pr-5">
+                                        <div class="flex items-center gap-4">
+                                            <div class="flex h-[52px] w-[52px] items-center justify-center rounded-xl bg-theme-pink-500/[0.08] text-theme-pink-500">
+                                                <i class="bi bi-x-circle-fill" style="font-size:24px;"></i>
+                                            </div>
+                                            <div>
+                                                <h4 class="mb-1 text-sm font-medium text-gray-800 dark:text-white/90">حجوزات مرفوضة</h4>
+                                                <span class="block text-sm text-gray-500 dark:text-gray-400">5</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center justify-between rounded-2xl border border-gray-100 bg-white py-4 pl-4 pr-4 dark:border-gray-800 dark:bg-white/[0.03] xl:pr-5">
+                                        <div class="flex items-center gap-4">
+                                            <div class="flex h-[52px] w-[52px] items-center justify-center rounded-xl bg-blue-500/[0.08] text-blue-light-500">
+                                                <i class="bi bi-stopwatch-fill" style="font-size:24px;"></i>
+                                            </div>
+                                            <div>
+                                                <h4 class="mb-1 text-sm font-medium text-gray-800 dark:text-white/90">متوسط وقت الرد</h4>
+                                                <span class="block text-sm text-gray-500 dark:text-gray-400">3 ساعات</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center justify-between rounded-2xl border border-gray-100 bg-white py-4 pl-4 pr-4 dark:border-gray-800 dark:bg-white/[0.03] xl:pr-5">
+                                        <div class="flex items-center gap-4">
+                                            <div class="flex h-[52px] w-[52px] items-center justify-center rounded-xl bg-theme-purple-500/[0.08] text-theme-purple-500">
+                                                <i class="bi bi-calendar-check" style="font-size:24px;"></i>
+                                            </div>
+                                            <div>
+                                                <h4 class="mb-1 text-sm font-medium text-gray-800 dark:text-white/90">تاريخ اليوم</h4>
+                                                <span class="block text-sm text-gray-500 dark:text-gray-400">2025-10-09</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-span-12 mt-6">
+                        <div class="overflow-hidden rounded-2xl border border-gray-200 bg-white pt-4 dark:border-gray-800 dark:bg-white/[0.03]">
+                            <div class="mb-4 flex items-center justify-between px-6">
+                                <div>
+                                    <h3 class="text-lg font-semibold text-gray-800 dark:text-white/90">طلبات حجز الاستشارات</h3>
+                                </div>
+                            </div>
+                            <div class="overflow-x-auto rounded-lg shadow-md">
+                                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                                    <thead class="border-gray-100 border-y dark:border-gray-800">
+                                        <tr>
+                                            <th scope="col" class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">الاسم</th>
+                                            <th scope="col" class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">الهاتف</th>
+                                            <th scope="col" class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">النوع</th>
+                                            <th scope="col" class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">الطبيب/الاستشاري</th>
+                                            <th scope="col" class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">نوع الخدمة</th>
+                                            <th scope="col" class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">التاريخ المفضل</th>
+                                            <th scope="col" class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">ملاحظات</th>
+                                            <th scope="col" class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">الحالة</th>
+                                            <th scope="col" class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">الإجراء</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
+
+                                        
+                                        <tr>
+                                            <td class="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900 dark:text-gray-200">أحمد محمد</td>
+                                            <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500 dark:text-gray-400">010xxxxxxx</td>
+                                            <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500 dark:text-gray-400">ذكر</td>
+                                            <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500 dark:text-gray-400">د. خالد صقر</td>
+                                            <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500 dark:text-gray-400">استشارة أولية</td>
+                                            <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500 dark:text-gray-400">2025-10-15 / 10:00 صباحاً</td>
+                                            <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500 dark:text-gray-400">أرغب في إنقاص 10 كجم</td>
+                                            <td class="whitespace-nowrap px-6 py-4 text-sm font-semibold text-warning-500 dark:text-warning-400">قيد الانتظار</td>
+                                            <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500 dark:text-gray-400 flex">
+                                                <a href="?action=accept&id=1" onclick="return confirm('هل أنت متأكد من قبول هذا الحجز؟')" class="btn-action btn-accept" title="قبول الحجز">
+                                                    <i class="bi bi-check-lg"></i>
+                                                </a>
+                                                <a href="?action=reject&id=1" onclick="return confirm('هل أنت متأكد من رفض هذا الحجز؟')" class="btn-action btn-reject" title="رفض الحجز">
+                                                    <i class="bi bi-x-lg"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900 dark:text-gray-200">فاطمة علي</td>
+                                            <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500 dark:text-gray-400">012xxxxxxx</td>
+                                            <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500 dark:text-gray-400">أنثى</td>
+                                            <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500 dark:text-gray-400">أ. سارة مصطفى</td>
+                                            <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500 dark:text-gray-400">متابعة شهرية</td>
+                                            <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500 dark:text-gray-400">2025-10-12 / 04:00 مساءً</td>
+                                            <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500 dark:text-gray-400">متابعة لخطة بناء العضلات.</td>
+                                            <td class="whitespace-nowrap px-6 py-4 text-sm font-semibold text-success-500 dark:text-success-400">مقبول</td>
+                                            <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500 dark:text-gray-400 flex">
+                                                <a href="?action=details&id=2" class="btn-action btn-accept" title="عرض التفاصيل">
+                                                    <i class="bi bi-eye"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900 dark:text-gray-200">يوسف إبراهيم</td>
+                                            <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500 dark:text-gray-400">011xxxxxxx</td>
+                                            <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500 dark:text-gray-400">ذكر</td>
+                                            <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500 dark:text-gray-400">د. خالد صقر</td>
+                                            <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500 dark:text-gray-400">خطة غذائية مخصصة</td>
+                                            <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500 dark:text-gray-400">2025-10-17 / 08:00 مساءً</td>
+                                            <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500 dark:text-gray-400">أعاني من حساسية الغلوتين.</td>
+                                            <td class="whitespace-nowrap px-6 py-4 text-sm font-semibold text-theme-pink-500 dark:text-theme-pink-400">مرفوض</td>
+                                            <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500 dark:text-gray-400 flex">
+                                                <a href="?action=delete&id=3" onclick="return confirm('هل أنت متأكد من حذف الطلب نهائياً؟')" class="btn-action btn-reject" title="حذف الطلب">
+                                                    <i class="bi bi-trash"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                                                            </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    <script defer src="../assets/js/bundle.js"></script>
+</body>
+</html>
