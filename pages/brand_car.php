@@ -19,17 +19,31 @@
             transform: translateY(-5px);
             box-shadow: 0 10px 20px rgba(0,0,0,0.1);
         }
+        
+        button.flex.items-center.justify-center.w-full.p-3.font-medium.text-white.rounded-lg.bg-danger-500.text-theme-sm.shadow-theme-xs.hover\:bg-danger-600 {
+            background: #ff0000;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            width: 35px;
+            height: 35px;
+        }
+
+        i.bi.bi-trash.mr-2 {
+            margin: 0;
+        }
+
+        button.flex.w-full.items-center.justify-center.rounded-lg.border.border-gray-300.bg-white.p-3.text-theme-sm.font-medium.text-gray-700.shadow-theme-xs.hover\:bg-gray-50.dark\:border-gray-700.dark\:bg-gray-800.dark\:text-gray-400.dark\:hover\:bg-white\/\[0\.03\] {
+            gap: 11px;
+        }
     </style>
 </head>
 <body x-data="{ page: 'car-brands', loaded: true, darkMode: false, isModalOpen: false, editModalOpen: false, currentBrand: {} }" 
       x-init="
         darkMode = JSON.parse(localStorage.getItem('darkMode')); 
         $watch('darkMode', value => localStorage.setItem('darkMode', JSON.stringify(value)));
-        
-        function openEditModal(brand) {
-            currentBrand = {...brand};
-            editModalOpen = true;
-        }
       " 
       :class="{'dark bg-gray-900': darkMode === true}">
     
@@ -41,17 +55,18 @@
         exit;
     }
 
-    $error = null;
-    $success = null;
+    $error = $_SESSION['error'] ?? null;
+    $success = $_SESSION['success'] ?? null;
+    unset($_SESSION['error']);
+    unset($_SESSION['success']);
 
-    // معالجة إضافة الماركة
     if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['add_brand'])) {
         $brandName = trim($_POST['brandName']);
         
         if (empty($brandName)) {
-           $error = "يرجى إدخال اسم الماركة.";
+            $_SESSION['error'] = "يرجى إدخال اسم الماركة.";
         } else if (!isset($_FILES["brandPhoto"]) || $_FILES["brandPhoto"]["error"] != UPLOAD_ERR_OK) {
-           $error = "يرجى رفع صورة للماركة.";
+            $_SESSION['error'] = "يرجى رفع صورة للماركة.";
         } else {
             $targetDir = "../uploads/brands/";
             if (!is_dir($targetDir)) {
@@ -64,40 +79,45 @@
             
             $allowedTypes = ['jpg', 'jpeg', 'png', 'gif'];
             if (!in_array(strtolower($fileExtension), $allowedTypes)) {
-                $error = "نوع ملف الصورة غير مسموح به.";
+                $_SESSION['error'] = "نوع ملف الصورة غير مسموح به.";
             } else if (move_uploaded_file($_FILES["brandPhoto"]["tmp_name"], $targetFilePath)) {
-                
                 $photoPath = "uploads/brands/" . $fileName;
-                
                 $stmt = $conn->prepare("INSERT INTO car_brands (name, photo) VALUES (?, ?)");
                 
                 if ($stmt === false) {
-                   $error = "خطأ في تجهيز استعلام قاعدة البيانات: " . $conn->error;
+                    $_SESSION['error'] = "خطأ في تجهيز استعلام قاعدة البيانات: " . $conn->error;
                 } else {
                     $stmt->bind_param("ss", $brandName, $photoPath);
                     
                     if ($stmt->execute()) {
-                        $success = "تمت إضافة الماركة بنجاح.";
+                        $_SESSION['success'] = "تمت إضافة الماركة بنجاح.";
                     } else {
-                        $error = "خطأ في إضافة الماركة: " . $stmt->error;
+                        $_SESSION['error'] = "خطأ في إضافة الماركة: " . $stmt->error;
                     }
                     $stmt->close();
                 }
-
             } else {
-                $error = "خطأ في رفع الصورة.";
+                $_SESSION['error'] = "خطأ في رفع الصورة.";
             }
         }
+        header("Location: ".$_SERVER['PHP_SELF']);
+        exit;
     }
 
-    // معالجة تحديث الماركة
     if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_brand'])) {
         $brandId = $_POST['brandId'];
         $brandName = trim($_POST['brandName']);
         
         if (empty($brandName)) {
-           $error = "يرجى إدخال اسم الماركة.";
+            $_SESSION['error'] = "يرجى إدخال اسم الماركة.";
         } else {
+            $stmt_select = $conn->prepare("SELECT photo FROM car_brands WHERE id = ?");
+            $stmt_select->bind_param("i", $brandId);
+            $stmt_select->execute();
+            $result = $stmt_select->get_result();
+            $oldBrandData = $result->fetch_assoc();
+            $stmt_select->close();
+
             $updateQuery = "UPDATE car_brands SET name = ?";
             $params = [$brandName];
             $types = "s";
@@ -114,40 +134,48 @@
                 
                 $allowedTypes = ['jpg', 'jpeg', 'png', 'gif'];
                 if (!in_array(strtolower($fileExtension), $allowedTypes)) {
-                    $error = "نوع ملف الصورة غير مسموح به.";
+                    $_SESSION['error'] = "نوع ملف الصورة غير مسموح به.";
                 } else if (move_uploaded_file($_FILES["brandPhoto"]["tmp_name"], $targetFilePath)) {
                     $photoPath = "uploads/brands/" . $fileName;
                     $updateQuery .= ", photo = ?";
                     $params[] = $photoPath;
                     $types .= "s";
+                    
+                    if ($oldBrandData && !empty($oldBrandData['photo'])) {
+                        $oldPhotoPath = "../" . $oldBrandData['photo'];
+                        if (file_exists($oldPhotoPath)) {
+                            unlink($oldPhotoPath);
+                        }
+                    }
                 } else {
-                    $error = "خطأ في رفع الصورة.";
+                    $_SESSION['error'] = "خطأ في رفع الصورة.";
                 }
             }
             
-            if (!$error) {
+            if (!isset($_SESSION['error'])) {
                 $updateQuery .= " WHERE id = ?";
                 $params[] = $brandId;
                 $types .= "i";
                 
                 $stmt = $conn->prepare($updateQuery);
                 if ($stmt === false) {
-                    $error = "خطأ في تجهيز استعلام قاعدة البيانات: " . $conn->error;
+                    $_SESSION['error'] = "خطأ في تجهيز استعلام قاعدة البيانات: " . $conn->error;
                 } else {
                     $stmt->bind_param($types, ...$params);
                     
                     if ($stmt->execute()) {
-                        $success = "تم تحديث الماركة بنجاح.";
+                        $_SESSION['success'] = "تم تحديث الماركة بنجاح.";
                     } else {
-                        $error = "خطأ في تحديث الماركة: " . $stmt->error;
+                        $_SESSION['error'] = "خطأ في تحديث الماركة: " . $stmt->error;
                     }
                     $stmt->close();
                 }
             }
         }
+        header("Location: ".$_SERVER['PHP_SELF']);
+        exit;
     }
     
-    // معالجة حذف الماركة
     if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['delete_brand'])) {
         $brandId = $_POST['brandIdToDelete'];
         
@@ -163,22 +191,22 @@
             $stmt_delete->bind_param("i", $brandId);
 
             if ($stmt_delete->execute()) {
-                // حذف الصورة من النظام
                 $photoPath = "../" . $brand_data['photo'];
                 if (!empty($brand_data['photo']) && file_exists($photoPath)) {
                     unlink($photoPath);
                 }
-                $success = "تم حذف الماركة بنجاح.";
+                $_SESSION['success'] = "تم حذف الماركة بنجاح.";
             } else {
-                $error = "خطأ في حذف الماركة: " . $stmt_delete->error;
+                $_SESSION['error'] = "خطأ في حذف الماركة: " . $stmt_delete->error;
             }
             $stmt_delete->close();
         } else {
-            $error = "لم يتم العثور على الماركة للحذف.";
+            $_SESSION['error'] = "لم يتم العثور على الماركة للحذف.";
         }
+        header("Location: ".$_SERVER['PHP_SELF']);
+        exit;
     }
 
-    // الحصول على الماركات للعرض (مع دعم البحث في نفس الصفحة)
     $search = isset($_GET['search']) ? trim($_GET['search']) : '';
     $whereClause = "";
     if (!empty($search)) {
@@ -195,15 +223,6 @@
 
     $stmt_brands->execute();
     $brands = $stmt_brands->get_result();
-    
-    // لإعادة التوجيه بعد عملية POST لتجنب إعادة الإرسال
-    if ($success || $error) {
-        // إذا كانت العملية نجحت أو فشلت، أعد توجيه المستخدم لنفس الصفحة
-        // يمكن حفظ الرسائل في الجلسة وعرضها، ولكن للتبسيط سنقوم بإعادة التحميل مع معلمات البحث إذا وجدت
-        // لتجنب فقدان رسائل النجاح/الخطأ بعد إعادة التوجيه، يجب استخدام الجلسات.
-        // تم ترك الرسائل معروضة فوق قائمة الماركات بعد إعادة التحميل.
-        // في بيئة حقيقية، يجب استخدام نمط Post/Redirect/Get (PRG) مع الجلسات للرسائل.
-    }
     ?>
     
     <div x-show="loaded" x-transition.opacity x-init="window.addEventListener('DOMContentLoaded', () => {setTimeout(() => loaded = false, 500)})" class="fixed inset-0 z-999999 flex items-center justify-center bg-white dark:bg-black">
@@ -358,7 +377,7 @@
                                                     </div>
                                                 </div>
                                                 <div class="flex items-center gap-3">
-                                                    <button @click="openEditModal(<?php echo htmlspecialchars(json_encode($brand)); ?>)" type="button" class="flex w-full items-center justify-center rounded-lg border border-gray-300 bg-white p-3 text-theme-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03]">
+                                                    <button @click="currentBrand = <?php echo htmlspecialchars(json_encode($brand)); ?>; editModalOpen = true;" type="button" class="flex w-full items-center justify-center rounded-lg border border-gray-300 bg-white p-3 text-theme-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03]">
                                                         <i class="bi bi-pencil-square mr-2"></i>
                                                         تعديل
                                                     </button>
@@ -366,7 +385,6 @@
                                                         <input type="hidden" name="brandIdToDelete" value="<?php echo $brand['id']; ?>">
                                                         <button type="submit" name="delete_brand" class="flex items-center justify-center w-full p-3 font-medium text-white rounded-lg bg-danger-500 text-theme-sm shadow-theme-xs hover:bg-danger-600" onclick="return confirm('هل أنت متأكد من حذف الماركة: <?php echo htmlspecialchars($brand['name']); ?>؟')">
                                                             <i class="bi bi-trash mr-2"></i>
-                                                            حذف
                                                         </button>
                                                     </form>
                                                 </div>
