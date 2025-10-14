@@ -160,21 +160,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     </div>
                 </div>
             </div>
-            <div class="bg-brand-950 relative hidden h-full w-full items-center lg:grid lg:w-1/2 dark:bg-white/5">
-                <div class="z-1 flex items-center justify-center">
-                    <div class="absolute right-0 top-0 -z-1 w-full max-w-[250px] xl:max-w-[450px]">
-                        <img src="../assets/img/grid-01.svg" alt="grid" />
-                    </div>
-                    <div class="absolute bottom-0 left-0 -z-1 w-full max-w-[250px] rotate-180 xl:max-w-[450px]">
-                        <img src="../assets/img/grid-01.svg" alt="grid" />
-                    </div>
-
-                    <div class="flex max-w-xs flex-col items-center">
-
-
-                    </div>
-                </div>
-            </div>
+         
 
             <div class="fixed right-6 bottom-6 z-50">
                 <button

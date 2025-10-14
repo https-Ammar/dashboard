@@ -1,6 +1,6 @@
 <?php
 session_start();
-require('../config/db.php');
+
 
 if (!isset($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
@@ -212,16 +212,7 @@ button[aria-label]{background:#ff5722;color:#fff;padding:10px;border-radius:5px;
                     </div>
                 </div>
             </div>
-            <div class="bg-brand-950 relative hidden h-full w-full items-center lg:grid lg:w-1/2 dark:bg-white/5">
-                <div class="z-1 flex items-center justify-center">
-                    <div class="absolute right-0 top-0 -z-1 w-full max-w-[250px] xl:max-w-[450px]">
-                        <img src="../assets/img/grid-01.svg" alt="grid" />
-                    </div>
-                    <div class="absolute bottom-0 left-0 -z-1 w-full max-w-[250px] rotate-180 xl:max-w-[450px]">
-                        <img src="../assets/img/grid-01.svg" alt="grid" />
-                    </div>
-                </div>
-            </div>
+        
             <div class="fixed right-6 bottom-6 z-50">
                 <button
                     class="bg-brand-500 hover:bg-brand-600 inline-flex size-14 items-center justify-center rounded-full text-white transition-colors"
