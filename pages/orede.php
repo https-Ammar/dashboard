@@ -12,7 +12,7 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
 $sql = "
     SELECT o.id AS order_id, o.userid, o.phone, o.name AS order_name,
            o.city, o.address, o.state, o.created_at AS order_date,
-           c.id AS car_id, c.title AS car_title
+           c.id AS car_id, c.title AS car_title, c.price AS car_price
     FROM `order` o
     LEFT JOIN car_cars c ON o.car_id = c.id
     WHERE o.id LIKE '%$search%'
@@ -128,8 +128,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
             font-size: 14px;
             transition: all 0.3s;
         }
-  
-
         .form-control {
             width: 100%;
             padding: 10px;
@@ -146,16 +144,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
             background-color: white;
         }
         .invoice-container {
-        background-color: #fff;
-        height: 100vh;
-    display: flex
-;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
+            background-color: #fff;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
         }
         .invoice-header {
-  
             border-bottom: 2px solid #bc1e2c;
             padding-bottom: 10px;
         }
@@ -164,11 +160,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
             margin-bottom: 10px;
         }
         .invoice-details {
-      
- 
             margin-bottom: 20px;
         }
- 
         .invoice-details p {
             margin: 5px 0;
             font-size: 14px;
@@ -182,61 +175,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
             border-top: 1px solid #e5e7eb;
             padding-top: 10px;
         }
-
-
-.invoice-details div p {
-    padding: 10px 0;
-    border-bottom: 1px solid;
-    display: flex
-;
-    align-items: center;
-    justify-content: space-between;
-}
-
-
-
-span#detail_user_status,span#detail_state{
-    padding: 0;
-}
-._flex {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-
-p.text-sm.text-gray-500 {
-    border: navajowhite;
-}
-
-
-span#detail_car,span#detail_state {
-    display: inline-block;
-    max-width: 80px; 
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    vertical-align: middle;
-}
-.invoice-details {width: 80%;}
-
+        .invoice-details div p {
+            padding: 10px 0;
+            border-bottom: 1px solid;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
-
+        span#detail_user_status,span#detail_state {
+            padding: 0;
+        }
+        ._flex {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        p.text-sm.text-gray-500 {
+            border: navajowhite;
+        }
+        span#detail_car,span#detail_state {
+            display: inline-block;
+            max-width: 80px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            vertical-align: middle;
+        }
+        .invoice-details {
+            width: 80%;
+        }
         @media screen and (max-width:992px) {
-            
-
-.invoice-container {
-    padding: 25px;
-}
-
-
-.invoice-details {width: 100%;}
-
+            .invoice-container {
+                padding: 25px;
+            }
+            .invoice-details {
+                width: 100%;
+            }
         }
-
-
-        
-        
     </style>
 </head>
 <body x-data="{ page: 'saas', loaded: true, darkMode: false, stickyMenu: false, sidebarToggle: false, scrollTop: false }" x-init="darkMode = JSON.parse(localStorage.getItem('darkMode')); $watch('darkMode', value => localStorage.setItem('darkMode', JSON.stringify(value)))" :class="{'dark bg-gray-900': darkMode === true}">
@@ -245,7 +220,6 @@ span#detail_car,span#detail_state {
     </div>
     <div class="flex h-screen overflow-hidden">
         <div class="relative flex flex-1 flex-col overflow-x-hidden overflow-y-auto">
-            <div :class="sidebarToggle ? 'block xl:hidden' : 'hidden'" class="fixed z-50 h-screen w-full bg-gray-900/50"></div>
             <main>
                 <div class="mx-auto max-w-(--breakpoint-2xl) p-4 md:p-6">
                     <div class="mb-8 flex flex-col justify-between gap-4 flex-row items-center">
@@ -362,6 +336,11 @@ span#detail_car,span#detail_state {
                                             </th>
                                             <th class="px-6 py-3 whitespace-nowrap">
                                                 <div class="flex items-center">
+                                                    <p class="font-medium text-gray-500 text-theme-xs dark:text-gray-400">السعر</p>
+                                                </div>
+                                            </th>
+                                            <th class="px-6 py-3 whitespace-nowrap">
+                                                <div class="flex items-center">
                                                     <p class="font-medium text-gray-500 text-theme-xs dark:text-gray-400">حالة المستخدم</p>
                                                 </div>
                                             </th>
@@ -433,6 +412,11 @@ span#detail_car,span#detail_state {
                                                         <?php endif; ?>
                                                     </td>
                                                     <td class="px-6 py-3 whitespace-nowrap">
+                                                        <p class="text-gray-700 text-theme-sm dark:text-gray-400">
+                                                            <?php echo $order['car_price'] ? number_format($order['car_price']) . ' ريال' : 'N/A'; ?>
+                                                        </p>
+                                                    </td>
+                                                    <td class="px-6 py-3 whitespace-nowrap">
                                                         <?php if ($order['userid'] != 0): ?>
                                                             <span class="status-badge user-status-registered">مسجل</span>
                                                         <?php else: ?>
@@ -445,7 +429,7 @@ span#detail_car,span#detail_state {
                                                         </span>
                                                     </td>
                                                     <td class="px-6 py-3 whitespace-nowrap">
-                                                        <span class="status-badge bg-blue-100 text-blue-800""><?= $order_date ?></span>
+                                                        <span class="status-badge bg-blue-100 text-blue-800"><?= $order_date ?></span>
                                                     </td>
                                                     <td class="px-6 py-3 whitespace-nowrap">
                                                         <span class="order-time"><?= $order_time ?></span>
@@ -455,7 +439,7 @@ span#detail_car,span#detail_state {
                                                             <button type="button" class="btn btn-primary" onclick="openUpdateModal(<?= $order['order_id'] ?>, '<?= htmlspecialchars($order['state']) ?>')">
                                                                 <i class="fas fa-edit"></i>
                                                             </button>
-                                                            <button type="button" class="btn btn-primary" onclick="openDetailsModal(<?= $order['order_id'] ?>, '<?= htmlspecialchars($order['order_name']) ?>', '<?= htmlspecialchars($order['phone']) ?>', '<?= htmlspecialchars($order['city']) ?>', '<?= htmlspecialchars($order['address']) ?>', '<?= $order['userid'] != 0 ? 'مسجل' : 'زائر' ?>', '<?= htmlspecialchars($order['state']) ?>', '<?= $order_date ?>', '<?= $order_time ?>', '<?= htmlspecialchars($order['car_title'] ?? 'N/A') ?>')">
+                                                            <button type="button" class="btn btn-primary" onclick="openDetailsModal(<?= $order['order_id'] ?>, '<?= htmlspecialchars($order['order_name']) ?>', '<?= htmlspecialchars($order['phone']) ?>', '<?= htmlspecialchars($order['city']) ?>', '<?= htmlspecialchars($order['address']) ?>', '<?= $order['userid'] != 0 ? 'مسجل' : 'زائر' ?>', '<?= htmlspecialchars($order['state']) ?>', '<?= $order_date ?>', '<?= $order_time ?>', '<?= htmlspecialchars($order['car_title'] ?? 'N/A') ?>', '<?= $order['car_price'] ? number_format($order['car_price']) . ' ريال' : 'N/A' ?>')">
                                                                 <i class="fas fa-eye"></i>
                                                             </button>
                                                         </div>
@@ -464,7 +448,7 @@ span#detail_car,span#detail_state {
                                             <?php endforeach; ?>
                                         <?php else: ?>
                                             <tr>
-                                                <td colspan="11" class="text-center py-4">
+                                                <td colspan="12" class="text-center py-4">
                                                     <div class="text-muted">
                                                         <i class="fas fa-inbox fa-3x mb-3"></i>
                                                         <h4>لا توجد طلبات حالياً</h4>
@@ -509,27 +493,17 @@ span#detail_car,span#detail_state {
     </div>
     <div id="detailsModal" class="modal">
         <div class="invoice-container">
-    
             <div class="invoice-details">
-            
-                    <div class="invoice-header">
-                <img src="https://via.placeholder.com/150" alt="Logo">
-          
-                
-                <div class="_flex">
-                
-                      <h2 class="text-2xl font-bold text-gray-800">فاتورة الطلب</h2> 
-                         <button type="button" class="btn btn-secondary mt-4" onclick="closeDetailsModal()">إغلاق</button></div>
-                         
-                <p class="text-sm text-gray-500">شركة هلال تيرا للاستيراد</p>
-                
-       
-                
-            </div>
-            
-            
+                <div class="invoice-header">
+                    <img src="https://via.placeholder.com/150" alt="Logo">
+                    <div class="_flex">
+                        <h2 class="text-2xl font-bold text-gray-800">فاتورة الطلب</h2>
+                        <button type="button" class="btn btn-secondary mt-4" onclick="closeDetailsModal()">إغلاق</button>
+                    </div>
+                    <p class="text-sm text-gray-500">شركة هلال تيرا للاستيراد</p>
+                </div>
                 <div>
-                    <h6 class="mb-3  mt-3 text-lg font-medium text-gray-700">معلومات العميل</h6>
+                    <h6 class="mb-3 mt-3 text-lg font-medium text-gray-700">معلومات العميل</h6>
                     <p><strong>الاسم:</strong> <span id="detail_name"></span></p>
                     <p><strong>الهاتف:</strong> <span id="detail_phone"></span></p>
                     <p><strong>المدينة:</strong> <span id="detail_city"></span></p>
@@ -540,12 +514,12 @@ span#detail_car,span#detail_state {
                     <h6 class="mb-3 text-lg font-medium text-gray-700">معلومات الطلب</h6>
                     <p><strong>رقم الطلب:</strong> <span id="detail_order_id"></span></p>
                     <p><strong>السيارة:</strong> <span id="detail_car"></span></p>
+                    <p><strong>السعر:</strong> <span id="detail_price"></span></p>
                     <p><strong>حالة الطلب:</strong> <span id="detail_state" class="status-badge bg-blue-100 text-blue-800"></span></p>
                     <p><strong>التاريخ:</strong> <span id="detail_date"></span></p>
                     <p><strong>الوقت:</strong> <span id="detail_time"></span></p>
                 </div>
             </div>
-    
         </div>
     </div>
     <script defer src="./bundle.js"></script>
@@ -558,7 +532,7 @@ span#detail_car,span#detail_state {
         function closeUpdateModal() {
             document.getElementById('updateModal').style.display = 'none';
         }
-        function openDetailsModal(orderId, name, phone, city, address, userStatus, state, date, time, car) {
+        function openDetailsModal(orderId, name, phone, city, address, userStatus, state, date, time, car, price) {
             document.getElementById('detail_order_id').textContent = '#' + orderId;
             document.getElementById('detail_name').textContent = name;
             document.getElementById('detail_phone').textContent = phone;
@@ -570,6 +544,7 @@ span#detail_car,span#detail_state {
             document.getElementById('detail_date').textContent = date;
             document.getElementById('detail_time').textContent = time;
             document.getElementById('detail_car').textContent = car;
+            document.getElementById('detail_price').textContent = price;
             document.getElementById('detailsModal').style.display = 'block';
         }
         function closeDetailsModal() {
